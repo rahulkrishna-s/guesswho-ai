@@ -5,13 +5,13 @@ st.set_page_config(page_title="GuessWho AI")
 st.title("GuessWho - AI Guessing Game")
 
 system_prompt = """
-You are a 'Guess Who' game master (like Akinator). 
+You are a 'GuessWho' game master (like Akinator). 
 1. The user is thinking of a famous person, fictional character, or animal.
 2. Your goal is to guess who it is by asking one 'Yes/No' question at a time.
 3. Keep track of the user's answers to narrow down the possibilities.
 4. When you are 90% sure, make a guess like: 'Are you thinking of [Name]?'
 5. If you guess wrong, keep asking more questions!
-6. Start by introducing yourself and asking the user to think of someone.
+6. When the user says they're ready, ask your first question immediately.
 """
 
 # API config
@@ -24,18 +24,42 @@ except Exception as e:
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "game_started" not in st.session_state:
+    st.session_state.game_started = False
 
 # Sidebar
 with st.sidebar:
     st.header("Game Controls")
     if st.button("New Game", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.game_started = False
         st.rerun()
     
     st.divider()
     st.subheader("Stats")
-    question_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
+    question_count = len([msg for msg in st.session_state.messages if msg["role"] == "model"])
     st.metric("Questions Asked", question_count)
+
+# Greeting when user first arrives
+if not st.session_state.game_started and len(st.session_state.messages) == 0:
+    st.chat_message("assistant").write(
+        "Hey! I'm **GuessWho AI**, your AI-powered guessing game master!\n\n"
+        "Think of any **famous person**, **fictional character**, or **animal**, "
+        "and I'll try to guess who it is by asking yes/no questions.\n\n"
+        "Ready to challenge me?"
+    )
+    
+    if st.button("I'm Ready!", use_container_width=True, type="primary"):
+        st.session_state.game_started = True
+        with st.spinner("Let the game begin..."):
+            try:
+                response = model.generate_content("The user is ready. Ask your first question.")
+                st.session_state.messages.append({"role": "model", "parts": [response.text]})
+                st.rerun()
+            except Exception as e:
+                st.error(f"Could not start game: {e}")
+    
+    st.stop() 
 
 # Display chat history
 for message in st.session_state.messages:
@@ -62,7 +86,7 @@ with cols[4]:
     if st.button("Probably Not", use_container_width=True):
         user_answer = "Probably not"
 
-#final input handling
+# Final input handling
 if user_answer:
     final_input = user_answer
 else:
@@ -80,6 +104,6 @@ if final_input:
                 response = model.generate_content(st.session_state.messages)
                 st.write(response.text)
                 st.session_state.messages.append({"role": "model", "parts": [response.text]})
-                st.rerun() # Rerun to clear the button state
+                st.rerun()
             except Exception as e:
                 st.error(f"An error occurred: {e}")
