@@ -43,7 +43,7 @@ with st.sidebar:
     
     st.divider()
     st.subheader("Stats")
-    question_count = len([msg for msg in st.session_state.messages if msg["role"] == "model"])
+    question_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
     st.metric("Questions Asked", f"{question_count}/{MAX_QUESTIONS}")
 
 # Greeting when user first arrives
@@ -72,18 +72,12 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["parts"][0])
 
-# Game over logic 
-question_count = len([msg for msg in st.session_state.messages if msg["role"] == "model"])
-if question_count >= MAX_QUESTIONS and not st.session_state.game_over:
-    st.session_state.game_over = True
-    st.rerun()
-
+# Game over screen
 if st.session_state.game_over:
     st.write("---")
     st.snow()
     st.error(f"**You stumped me!** I couldn't guess it in {MAX_QUESTIONS} questions.")
     
-    # Ask user to reveal who they were thinking of
     with st.form("reveal_form"):
         st.write("**Who were you thinking of?**")
         answer = st.text_input("Tell me who it was:")
@@ -98,7 +92,7 @@ if st.session_state.game_over:
         st.session_state.game_over = False
         st.rerun()
     
-    st.stop()  
+    st.stop()
 
 # Response buttons
 st.write("---")
@@ -132,6 +126,12 @@ if final_input:
         st.write(final_input)
 
     st.session_state.messages.append({"role": "user", "parts": [final_input]})
+    
+    # Check game over before ai responds
+    question_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
+    if question_count >= MAX_QUESTIONS:
+        st.session_state.game_over = True
+        st.rerun()
     
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
