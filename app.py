@@ -31,6 +31,8 @@ if "game_started" not in st.session_state:
     st.session_state.game_started = False
 if "game_over" not in st.session_state:
     st.session_state.game_over = False
+if "ai_won" not in st.session_state:
+    st.session_state.ai_won = False
 
 # Sidebar
 with st.sidebar:
@@ -39,12 +41,13 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.game_started = False
         st.session_state.game_over = False
+        st.session_state.ai_won = False
         st.rerun()
     
     st.divider()
     st.subheader("Stats")
     question_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
-    st.metric("Questions Asked", f"{question_count}/{MAX_QUESTIONS}")
+    st.metric("Questions Answered", f"{question_count}/{MAX_QUESTIONS}")
 
 # Greeting when user first arrives
 if not st.session_state.game_started and len(st.session_state.messages) == 0:
@@ -75,21 +78,27 @@ for message in st.session_state.messages:
 # Game over screen
 if st.session_state.game_over:
     st.write("---")
-    st.snow()
-    st.error(f"**You stumped me!** I couldn't guess it in {MAX_QUESTIONS} questions.")
     
-    with st.form("reveal_form"):
-        st.write("**Who were you thinking of?**")
-        answer = st.text_input("Tell me who it was:")
-        if st.form_submit_button("Reveal"):
-            if answer:
-                st.info(f"Ah, **{answer}**! I'll remember that for next time.")
-                st.balloons()
+    if st.session_state.ai_won:
+        st.balloons()
+        st.success("🎉 **I guessed it!** Thanks for playing!")
+    else:
+        st.snow()
+        st.error(f"**You stumped me!** I couldn't guess it in {MAX_QUESTIONS} questions.")
+        
+        with st.form("reveal_form"):
+            st.write("**Who were you thinking of?**")
+            answer = st.text_input("Tell me who it was:")
+            if st.form_submit_button("Reveal"):
+                if answer:
+                    st.info(f"Ah, **{answer}**! I'll remember that for next time.")
+                    st.balloons()
     
     if st.button("Play Again", type="primary", use_container_width=True):
         st.session_state.messages = []
         st.session_state.game_started = False
         st.session_state.game_over = False
+        st.session_state.ai_won = False
         st.rerun()
     
     st.stop()
@@ -115,6 +124,12 @@ with cols[4]:
     if st.button("Probably Not", use_container_width=True):
         user_answer = "Probably not"
 
+# Correct Guess button
+if st.button("🎉 Correct Guess!", use_container_width=True, type="primary"):
+    st.session_state.game_over = True
+    st.session_state.ai_won = True
+    st.rerun()
+
 # Final input handling
 if user_answer:
     final_input = user_answer
@@ -131,6 +146,7 @@ if final_input:
     question_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
     if question_count >= MAX_QUESTIONS:
         st.session_state.game_over = True
+        st.session_state.ai_won = False
         st.rerun()
     
     with st.chat_message("assistant"):
