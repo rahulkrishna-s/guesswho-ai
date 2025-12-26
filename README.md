@@ -1,5 +1,10 @@
 # GuessWho AI - Powered by Gemini
 
+![GuessWho Demo](demo.gif)
+> *Demo: The AI successfully guessing "Iron Man" in just 7 questions.*
+
+**[📺 Watch Full Demo Video](https://youtu.be/QghOEwUszBU)**
+
 ## About The Project
 This is a logic based guessing game where the AI acts as the Game Master (similar to Akinator). It challenges the user to think of a character, and the AI attempts to guess it using a limited number of Yes/No questions.
 
@@ -30,3 +35,4 @@ The core challenge was handling Streamlit's rerun cycle while maintaining conver
 4. **Run the App**
     ```bash
     streamlit run app.py
+
