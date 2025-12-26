@@ -19,7 +19,7 @@ You are a 'GuessWho' game master (like Akinator).
 # API config
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-2.5-flash-lite', system_instruction=system_prompt)
+    model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_prompt)
 except Exception as e:
     st.error("Could not connect to API. Make sure API key is correct.")
 

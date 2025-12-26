@@ -3,7 +3,7 @@
 ![GuessWho Demo](demo.gif)
 > *Demo: The AI successfully guessing "Iron Man" in just 7 questions.*
 
-**[📺 Watch Full Demo Video](https://youtu.be/QghOEwUszBU)**
+**[Watch the 1 minute gameplay demo](https://youtu.be/3Fkp1LAS0t4)**
 
 ## About The Project
 This is a logic based guessing game where the AI acts as the Game Master (similar to Akinator). It challenges the user to think of a character, and the AI attempts to guess it using a limited number of Yes/No questions.
